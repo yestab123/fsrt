@@ -187,6 +187,9 @@ recv_file(int sockfd, char *temp) {
                 continue;
             } 
             printf("recv %s\n", strerror(errno));
+            if (errno != 0) {
+                exit(0);
+            }
             break;
         }
         
