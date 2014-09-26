@@ -303,23 +303,11 @@ connect_ser(char *ip, int port) {
     return sockfd;
 }
 
-char *l_opt_arg;
-struct option long_options[] = {
-    
-     { "send", 0, NULL, 's' },
-    
-     { "recv", 0, NULL, 'r' },
-  
-     { "file", 1, NULL, 'f' },
-    
-     { 0, 0, 0, 0 },
-};
-
 int
 print_help() {
     printf(
            "Linux File Send/Recv Tool(FSRT)\n"
-           "CopyRight By WinkChow\n"
+           "(LizhiFM)\n"
            "Version:%s\n"
            "# You can set this tool to be a client or be a server.\n"
            "# It can be recv or send file when being a client or server.\n"
@@ -328,13 +316,13 @@ print_help() {
            "# Client and Server mode only one can be set.\n"
            "\n\n"
            "# Option:\n"
-           "-s    (send)send file mode\n"
-           "-r    (recv)recv file mode\n"
-           "-c    (client)client mode\n"
-           "-a    (accept)server mode\n"
-           "-f [file]   (file)Send file(If -s is set then this must be set)\n"
-           "-i [ip]     (ip)Set conn or listen ip\n"
-           "-p [port]   (port)Set conn or listen port\n"
+           "-s/--send    (send)send file mode\n"
+           "-r/--recv    (recv)recv file mode\n"
+           "-c/--client    (client)client mode\n"
+           "-a/--server    (accept)server mode\n"
+           "-f/--file [file]   (file)Send file(If -s is set then this must be set)\n"
+           "-i/--ip [ip]     (ip)Set conn or listen ip\n"
+           "-p/--port [port]   (port)Set conn or listen port\n"
            "-v/-h   (version/help)\n\n",
            VERSION
            );
@@ -364,7 +352,17 @@ main(int argc, char **argv) {
     strncpy(ip, DEFAULT_IP, 32);
     port = DEFAULT_PORT;
 
-    while((c = getopt(argc, argv, "vhsrcai:p:f:"))!= -1) {
+    struct option long_options[] = {
+        { "send", 0, NULL, 's' },
+        { "recv", 0, NULL, 'r' },
+        { "client", 0, NULL, 'c' },
+        { "server", 0, NULL, 'a' },
+        { "file", 1, NULL, 'f' },
+        { "ip", 1, NULL, 'i' },
+        { "port", 1, NULL, 'p' },
+        { 0, 0, 0, 0 },
+    };
+    while((c = getopt_long(argc, argv, "vhsrcai:p:f:", long_options, NULL))!= -1) {
         switch(c) {
         case 's': 
             mode = SEND_MODE;
