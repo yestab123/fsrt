@@ -3,8 +3,9 @@ FSRT(File Send/Recv Tool)
 
      Linux File Send/Recv Tool
      Version 0.2.0
-     It can run on author Linux system(Centos 6.5/Ubuntu 14.04) without add any lib or do anything complicate, 
-          you just need to run command "make" and then you can run the program. 
+     It can run on author Linux system(Centos 6.5/Ubuntu 14.04) without add any lib 
+     or do anything complicate, you just need to run command "make" and
+     then you can run the program. 
      
      You can send file or recv file from one linux to other linux.
      You can switch which to be a server or a client.
