@@ -2,7 +2,7 @@ FSRT(File Send/Recv Tool)
 ==============
 
      Linux File Send/Recv Tool
-     Version 0.1.1
+     Version 0.2.0
      
      You can send file or recv file from one linux to other linux.
      You can switch which to be a server or a client.
