@@ -8,7 +8,7 @@ LIBS = -lm -lrt
 
 TARGET = fsrt
 
-OBJS = tool.o send.o
+OBJS = tool.o send.o connect.o file.o
 
 all: $(TARGET)
 # ----------- Application --------------------------------------------------
