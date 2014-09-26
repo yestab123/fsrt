@@ -19,7 +19,7 @@
 
 #include "tool.h"
 
-#define VERSION "0.1.1"
+#define VERSION "0.2.0"
 
 #define DEFAULT_IP   "0.0.0.0"
 #define DEFAULT_PORT 6500
@@ -314,7 +314,7 @@ print_help() {
            "# Now only can support send or recv one file each time.\n"
            "# Recv and Send mode only one can be set.\n"
            "# Client and Server mode only one can be set.\n"
-           "\n\n"
+           "\n"
            "# Option:\n"
            "-s/--send    (send)send file mode\n"
            "-r/--recv    (recv)recv file mode\n"
@@ -323,7 +323,7 @@ print_help() {
            "-f/--file [file]   (file)Send file(If -s is set then this must be set)\n"
            "-i/--ip [ip]     (ip)Set conn or listen ip\n"
            "-p/--port [port]   (port)Set conn or listen port\n"
-           "-v/-h   (version/help)\n\n",
+           "-v/-h/--help/--version   (version/help)\n\n",
            VERSION
            );
 }
@@ -360,6 +360,8 @@ main(int argc, char **argv) {
         { "file", 1, NULL, 'f' },
         { "ip", 1, NULL, 'i' },
         { "port", 1, NULL, 'p' },
+        { "help", 0, NULL, 'v' },
+        { "version", 0, NULL, 'h' },
         { 0, 0, 0, 0 },
     };
     while((c = getopt_long(argc, argv, "vhsrcai:p:f:", long_options, NULL))!= -1) {
@@ -394,17 +396,23 @@ main(int argc, char **argv) {
     }
     
     if (connect_mode == 0) {
-        printf("connect mode not set\n");
+        printf("**ERROR**\n");
+        printf("**ERROR:connect mode not set\n\n");
+        print_help();
         exit(0);
     }
 
     if (mode == 0) {
-        printf("send recv mode not set\n");
+        printf("**ERROR**\n");
+        printf("**ERROR:send recv mode not set\n\n");
+        print_help();
         exit(0);
     }
 
     if ((mode == SEND_MODE) && (file_set == 0)) {
-        printf("file not set\n");
+        printf("**ERROR**\n");
+        printf("**ERRORfile not set\n\n");
+        print_help();
         exit(0);
     }
 
