@@ -6,8 +6,41 @@
 #include <stdint.h>
 #include <fcntl.h>
 #include <sys/socket.h>
+#include <math.h>
+#include <netdb.h>
+#include <time.h>
+#include <stdint.h>
 
 #include "tool.h"
+
+
+uint32_t 
+get_now_sec(void) {
+    
+    time_t sec;
+    struct timespec spec;
+
+    clock_gettime(CLOCK_REALTIME, &spec);
+
+    sec = spec.tv_sec;
+
+    return sec;
+}
+
+uint64_t
+get_now_msec(void) {
+    
+    uint64_t ms;
+    time_t sec;
+    struct timespec spec;
+
+    clock_gettime(CLOCK_REALTIME, &spec);
+
+    sec = spec.tv_sec;
+    ms = round(spec.tv_nsec / 1.0e6);
+
+    return sec * 1.0e3 + ms;
+}
 
 int
 set_reuseaddr(int fd) {

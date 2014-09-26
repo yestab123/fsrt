@@ -11,56 +11,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdint.h>
-#include <math.h>
-#include <netdb.h>
-#include <time.h>
 #include <assert.h>
 #include <getopt.h>
 
 #include "tool.h"
-
-#define VERSION "0.2.0"
-
-#define DEFAULT_IP   "0.0.0.0"
-#define DEFAULT_PORT 6500
-#define SEND_BLOCK   128
-#define MAX_BUFF     2048
-
-#define SEND_MODE    1
-#define RECV_MODE    2
-
-#define CONN_MODE    3
-#define SERV_MODE    4
+#include "define.h"
+#include "connect.h"
 
 off_t  all_file_size;
-
-uint32_t
-get_now_sec(void) {
-    
-    time_t sec;
-    struct timespec spec;
-
-    clock_gettime(CLOCK_REALTIME, &spec);
-
-    sec = spec.tv_sec;
-
-    return sec;
-}
-
-uint64_t
-get_now_msec(void) {
-    
-    uint64_t ms;
-    time_t sec;
-    struct timespec spec;
-
-    clock_gettime(CLOCK_REALTIME, &spec);
-
-    sec = spec.tv_sec;
-    ms = round(spec.tv_nsec / 1.0e6);
-
-    return sec * 1.0e3 + ms;
-}
 
 int
 print_speed(char *file_name, uint64_t sum, uint64_t now) {
@@ -256,55 +214,6 @@ parse_name(int sockfd, char *file_name) {
     parse_proto(file_name, proto);
 }
 
-int 
-accept_conn(char *ip, int port) {
-    int sockfd;
-    int i;
-    struct sockaddr_in seraddr;
-    
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    set_reuseaddr(sockfd);
-
-    seraddr.sin_addr.s_addr = inet_addr(ip);
-    seraddr.sin_port = htons(port);
-    seraddr.sin_family = AF_INET;
-
-    i = bind(sockfd, (struct sockaddr*)&seraddr, sizeof(seraddr));
-    if (i < 0) {
-        printf("bind %s:%d error %s\n", ip, port, strerror(errno));
-        exit(0);
-    }
-
-    listen(sockfd, 10);
-
-    i = accept(sockfd, NULL, NULL);
-    if (i < 0) {
-        printf("accept %d error %s\n", sockfd, strerror(errno));
-        exit(0);
-    }
-
-    return i;
-}
-
-int
-connect_ser(char *ip, int port) {
-    int sockfd;
-    int i;
-    struct sockaddr_in ser;
-
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    ser.sin_addr.s_addr = inet_addr(ip);
-    ser.sin_port = htons(port);
-    ser.sin_family = AF_INET;
-
-    i = connect(sockfd, (struct sockaddr*)&ser, sizeof(ser));
-    if (i < 0) {
-        printf("connect to %s:%d error %s\n", ip, port, strerror(errno));
-        exit(0);
-    }
-
-    return sockfd;
-}
 
 int
 print_help() {
@@ -446,6 +355,9 @@ main(int argc, char **argv) {
     } else {
         run = get_now_msec() - run;
         waste = (float)run / 1000;
+        if (waste <= 0) {
+            waste = 1;
+        }
         avg = (all_file_size / waste) / 1024;
         printf("send file finish, time waste: %.1fs, avg send rate: %.1fKB/s\n", waste, avg);
     }
