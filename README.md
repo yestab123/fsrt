@@ -28,8 +28,8 @@ FSRT(File Send/Recv Tool)
           Server: ./fsrt -r -a -i 0.0.0.0 -p 6500
           Client: ./fsrt -s -c -i X.X.X.X -p 6500 -f send_file.tar.gz
                or
-          Server: ./fsrt --recv --server -i 0.0.0.0 -p 6500
-          Client: ./fsrt --send --client -i X.X.X.X -p 6500 -f send_file.tar.gz          
+          Server: ./fsrt --recv --server --ip 0.0.0.0 --port 6500
+          Client: ./fsrt --send --client --ip X.X.X.X --port 6500 -f send_file.tar.gz          
      2. Server send file and client recv file.
           Server: ./fsrt -s -a -i 0.0.0.0 -p 6500 -f send_file.tar.gz
           Client: ./fsrt -r -c -i X.X.X.X -p 6500 
