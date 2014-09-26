@@ -17,6 +17,8 @@
 #include <assert.h>
 #include <getopt.h>
 
+#include "tool.h"
+
 #define VERSION "0.1.1"
 
 #define DEFAULT_IP   "0.0.0.0"
@@ -185,12 +187,70 @@ recv_file(int sockfd, char *temp) {
                 continue;
             } 
             printf("recv %s\n", strerror(errno));
-            exit(0);
+            break;
         }
         
         write(fd, buff, i);
     }
    
+}
+
+int
+send_name(int sockfd, char *file_name) {
+    char proto[PROTO_LEN + PROTO_FLAG + PROTO_NAME];
+    int  len;
+    int  i;
+    int  move;
+
+    memset(proto, '\0', PROTO_LEN + PROTO_FLAG + PROTO_NAME);
+    init_proto(file_name, proto, &len);
+    
+    move = 0;
+    
+    while(move < len) {
+        i = send(sockfd, proto + move, len - move, MSG_NOSIGNAL);
+        if (i <= 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            printf("send %s\n", strerror(errno));
+            exit(0);
+        }
+        move += i;
+    }
+    return 0;
+}
+
+int
+parse_name(int sockfd, char *file_name) {
+    uint32_t len = 4;
+    uint32_t idx = 0;
+    int i;
+    char proto[PROTO_LEN + PROTO_FLAG + PROTO_NAME];
+
+    memset(proto, '\0', PROTO_LEN + PROTO_FLAG + PROTO_NAME);
+    
+    while(1) {
+        i = recv(sockfd, proto + idx, len - idx, 0);
+        if (i <= 0) {
+            if (i == EINTR) {
+                continue;
+            }
+            printf("recv %s\n", strerror(errno));
+            exit(0);
+        }
+        idx += i;
+        if (idx < len) {
+            continue;
+        } else if (len == 4) {
+            len = bytes_to_ui32(proto, 1);
+            continue;
+        } else {
+            break;
+        }
+    }
+
+    parse_proto(file_name, proto);
 }
 
 int 
@@ -200,6 +260,8 @@ accept_conn(char *ip, int port) {
     struct sockaddr_in seraddr;
     
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    set_reuseaddr(sockfd);
+
     seraddr.sin_addr.s_addr = inet_addr(ip);
     seraddr.sin_port = htons(port);
     seraddr.sin_family = AF_INET;
@@ -285,15 +347,19 @@ main(int argc, char **argv) {
     float avg;
     char  c;
     char  file[128];
+    char  file_name[PROTO_NAME];
     char  ip[32];
+    char  command[PROTO_NAME + 100];
     int   port = 0;
     int   file_set = 0;
     int   mode = 0;
     int   connect_mode = 0;
     int   sockfd;
 
+    memset(file_name, '\0', PROTO_NAME);
     memset(ip, '\0', 32);
     memset(file, '\0', 128);
+    memset(command, '\0', PROTO_NAME + 100);
 
     strncpy(ip, DEFAULT_IP, 32);
     port = DEFAULT_PORT;
@@ -356,15 +422,22 @@ main(int argc, char **argv) {
     run = get_now_msec();
     switch(mode) {
     case SEND_MODE:
+        send_name(sockfd, file);
         send_file(sockfd, file, SEND_BLOCK);
         break;
     case RECV_MODE:
+        parse_name(sockfd, file_name);
         recv_file(sockfd, "temp.file");
         break;
     }
 
-    run = get_now_msec() - run;
-    waste = (float)run / 1000;
-    avg = (all_file_size / waste) / 1024;
-    printf("send file finish, time waste: %.1fs, avg send rate: %.1fKB/s\n", waste, avg);
+    if (mode == RECV_MODE) {
+        snprintf(command, PROTO_NAME + 100, "mv temp.file %s", file_name);
+        system(command);
+    } else {
+        run = get_now_msec() - run;
+        waste = (float)run / 1000;
+        avg = (all_file_size / waste) / 1024;
+        printf("send file finish, time waste: %.1fs, avg send rate: %.1fKB/s\n", waste, avg);
+    }
 }
