@@ -19,7 +19,7 @@
 
 #define VERSION "0.1.1"
 
-#define DEFAULT_IP   "113.10.136.179"
+#define DEFAULT_IP   "0.0.0.0"
 #define DEFAULT_PORT 6500
 #define SEND_BLOCK   128
 #define MAX_BUFF     2048
@@ -100,8 +100,8 @@ print_speed(char *file_name, uint64_t sum, uint64_t now) {
         run_time = get_now_msec();
     }
 
-    printf("%s [%.2f\%]: %.2fKB/S  %.2f%s/%.2f%s \r", 
-           file_name, (float)((float)now/(float)sum) * 100, rate, now_mb, unit_n, sum_mb, unit_s);
+    printf("%s [%.2f%s]: %.2fKB/S  %.2f%s/%.2f%s \r", 
+           file_name, (float)((float)now/(float)sum) * 100, "%", rate, now_mb, unit_n, sum_mb, unit_s);
     setbuf(stdin, NULL);
 }
 
@@ -172,7 +172,7 @@ recv_file(int sockfd, char *temp) {
     int i;
     char buff[MAX_BUFF];
 
-    fd = open(temp, O_RDWR | O_CREAT | O_TRUNC, 0644);
+    fd = open(temp, O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (fd < 0) {
         printf("open file error %s\n", strerror(errno));
         exit(0);
