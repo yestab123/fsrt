@@ -154,7 +154,7 @@ main(int argc, char **argv) {
     case RECV_MODE:
         parse_name(sockfd, file_name, &all_file_size);
         printf("recv file %s size:%u now...\n", file_name, all_file_size);
-        recv_file(sockfd, "temp.file");
+        recv_file(sockfd, "temp.file", all_file_size);
         break;
     }
 

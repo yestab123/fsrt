@@ -58,6 +58,10 @@ print_speed(char *file_name, uint64_t sum, uint64_t now) {
         rate *= 1000;
         run_time = get_now_msec();
     }
+    
+    if (sum == 0) {
+        return 0;
+    }
 
     printf("%s [%.2f%s]: %.2fKB/S  %.2f%s/%.2f%s \r", 
            file_name, (float)((float)now/(float)sum) * 100, "%", rate, now_mb, unit_n, sum_mb, unit_s);
@@ -126,31 +130,42 @@ send_file(int sockfd, char *file_name, int block) {
 }
 
 int 
-recv_file(int sockfd, char *temp) {
+recv_file(int sockfd, char *temp, int file_size) {
     int fd;
     int i;
+    int move = 0;
+    int set;
     char buff[MAX_BUFF];
 
+    
     fd = open(temp, O_RDWR | O_CREAT | O_TRUNC, 0666);
     if (fd < 0) {
         printf("open file error %s\n", strerror(errno));
         exit(0);
     }
-
+    
+    print_speed(NULL, 0, 0);
+    
     while(1) {
-        i = recv(sockfd, buff, MAX_BUFF, 0);
-        if (i <= 0) {
-            if (errno == EINTR) {
-                continue;
-            } 
-            printf("recv %s\n", strerror(errno));
-            if (errno != 0) {
-                exit(0);
-            }
-            break;
+        set = (file_size - move) > MAX_BUFF ? MAX_BUFF:(file_size - move);
+        i = recv(sockfd, buff, set, 0);
+        if (move >= file_size) {
+            printf("\n");
+            return 0;
         }
-        
-        write(fd, buff, i);
+        if (i < 0) {
+            if (errno == EINTR) {
+                continue; 
+           } else {
+                printf("%d", errno);
+                printf("Recv error : %s\n", strerror(errno));
+                exit(0);                
+            }
+        } else if (i > 0) {
+            move += i;
+            print_speed("Recv", file_size, move);
+            write(fd, buff, i);
+        }
     }
    
 }
