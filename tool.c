@@ -132,15 +132,16 @@ get_file_name(char *file_name) {
 }
 
 int
-init_proto(char *file_name, char *proto, int *llen) {
+init_proto(char *file_name, char *proto, int file_size, int *llen) {
     uint16_t flag;
     uint32_t len;
 
     flag = COMPARE_FLAG;
-    len = strlen(file_name) + PROTO_LEN + PROTO_FLAG;
+    len = strlen(file_name) + PROTO_LEN + PROTO_FLAG + PROTO_FILE;
     ui32_to_bytes(proto, len);
     ui16_to_bytes(proto + PROTO_LEN, flag);
-    strncpy(proto + PROTO_LEN + PROTO_FLAG, file_name, 
+    ui32_to_bytes(proto + PROTO_LEN + PROTO_FLAG, file_size);
+    strncpy(proto + PROTO_LEN + PROTO_FLAG + PROTO_FILE, file_name, 
             strlen(file_name));
 
     *llen = len; 
@@ -148,7 +149,7 @@ init_proto(char *file_name, char *proto, int *llen) {
 }
 
 int 
-parse_proto(char *file_name, char *proto) {
+parse_proto(char *file_name, char *proto, int *file_size) {
     uint32_t len;
     uint16_t flag;
     int name_len;
@@ -160,8 +161,10 @@ parse_proto(char *file_name, char *proto) {
     }
     
     len = bytes_to_ui32(proto, 1);
-    name_len = len - PROTO_LEN - PROTO_FLAG;
+    *file_size = bytes_to_ui32(proto + PROTO_LEN + PROTO_FLAG, 1);
+    name_len = len - PROTO_LEN - PROTO_FLAG - PROTO_FILE;
 
-    strncpy(file_name, proto + PROTO_LEN + PROTO_FLAG, name_len);
+    strncpy(file_name, proto + PROTO_LEN + PROTO_FLAG + PROTO_FILE,
+            name_len);
     return 0;
 }

@@ -23,8 +23,6 @@ extern all_file_size;
 
 int
 print_speed(char *file_name, uint64_t sum, uint64_t now) {
-    double sum_t;
-    double now_t;
     char *unit_n;
     char *unit_s;
     double sum_mb;
@@ -163,9 +161,11 @@ send_name(int sockfd, char *file_name) {
     int  len;
     int  i;
     int  move;
+    struct stat file_stat;
 
     memset(proto, '\0', PROTO_LEN + PROTO_FLAG + PROTO_NAME);
-    init_proto(file_name, proto, &len);
+    stat(file_name, &file_stat);
+    init_proto(get_file_name(file_name), proto, file_stat.st_size, &len);
     
     move = 0;
     
@@ -184,13 +184,14 @@ send_name(int sockfd, char *file_name) {
 }
 
 int
-parse_name(int sockfd, char *file_name) {
+parse_name(int sockfd, char *file_name, int *file_size) {
     uint32_t len = 4;
     uint32_t idx = 0;
     int i;
-    char proto[PROTO_LEN + PROTO_FLAG + PROTO_NAME];
+    char proto[PROTO_LEN + PROTO_FLAG + PROTO_NAME + PROTO_FILE];
 
-    memset(proto, '\0', PROTO_LEN + PROTO_FLAG + PROTO_NAME);
+    memset(proto, '\0', PROTO_LEN + PROTO_FLAG + PROTO_NAME 
+           + PROTO_FILE);
     
     while(1) {
         i = recv(sockfd, proto + idx, len - idx, 0);
@@ -212,6 +213,6 @@ parse_name(int sockfd, char *file_name) {
         }
     }
 
-    parse_proto(file_name, proto);
+    parse_proto(file_name, proto, file_size);
 }
 

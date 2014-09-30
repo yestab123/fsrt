@@ -83,6 +83,7 @@ main(int argc, char **argv) {
         { "version", 0, NULL, 'h' },
         { 0, 0, 0, 0 },
     };
+    
     while((c = getopt_long(argc, argv, "vhsrcai:p:f:", long_options, NULL))!= -1) {
         switch(c) {
         case 's': 
@@ -151,7 +152,8 @@ main(int argc, char **argv) {
         send_file(sockfd, file, SEND_BLOCK);
         break;
     case RECV_MODE:
-        parse_name(sockfd, file_name);
+        parse_name(sockfd, file_name, &all_file_size);
+        printf("recv file %s size:%u now...\n", file_name, all_file_size);
         recv_file(sockfd, "temp.file");
         break;
     }
