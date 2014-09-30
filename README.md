@@ -38,8 +38,8 @@ FSRT(File Send/Recv Tool)
      
 ###Notic:
 
-~~1. The recv file with save the name as temp.file in program path, ~~
-~~we should change it name to what we want now.(Next version will change name by auto)~~ 
+~~1. The recv file with save the name as temp.file in program path, 
+we should change it name to what we want now.(Next version will change name by auto)~~ 
      （It can change name auto in new version)
 
 2. More and more function will add in this tool on furture version.
